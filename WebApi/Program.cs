@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Infrastructure.Persistence;
 using Infrastructure.Auth;
+using Infrastructure.Persistence.Seeders;
 
 namespace WebApi
 {
@@ -17,7 +18,11 @@ namespace WebApi
 
             // DbContext
             builder.Services.AddDbContext<AppDbContext>(opt =>
-                opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+                opt.UseSqlServer(
+                    builder.Configuration.GetConnectionString("Default"),
+                    x => x.MigrationsAssembly("Infrastructure") 
+                )
+            );
 
             // JWT
             var jwt = builder.Configuration.GetSection("Jwt");
@@ -88,6 +93,8 @@ namespace WebApi
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 await UserSeeder.SeedAdminAsync(db);
+                await StudentSeeder.SeedTestStudentAsync(db);
+
             }
 
             app.UseHttpsRedirection();

@@ -13,7 +13,7 @@ public static class UserSeeder
                 Id = Guid.NewGuid(),
                 Email = "admin@example.com",
                 PasswordHash = PasswordHasher.Hash("admin123"),
-                Role = UserRole.Student
+                Role = UserRole.Admin
             };
             db.Users.Add(admin);
             await db.SaveChangesAsync();
