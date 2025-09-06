@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Infrastructure.Persistence;
 using Infrastructure.Auth;
 using Infrastructure.Persistence.Seeders;
 
@@ -20,7 +19,7 @@ namespace WebApi
             builder.Services.AddDbContext<AppDbContext>(opt =>
                 opt.UseSqlServer(
                     builder.Configuration.GetConnectionString("Default"),
-                    x => x.MigrationsAssembly("Infrastructure") 
+                    x => x.MigrationsAssembly("Infrastructure")
                 )
             );
 
@@ -44,16 +43,28 @@ namespace WebApi
 
             builder.Services.AddScoped<JwtTokenService>();
             builder.Services.AddAuthorization();
-            // Add services to the container.
+
+            // ✅ CORS ekle
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:5173") // React dev server adresi
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
+
+            // Swagger
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "StudentCourse API", Version = "v1" });
 
-                // 🔐 JWT desteği ekle
+                // 🔐 JWT desteği
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     In = ParameterLocation.Header,
@@ -64,20 +75,19 @@ namespace WebApi
                 });
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
-                }
-            },
-            new string[]{}
-        }
-    });
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type=ReferenceType.SecurityScheme,
+                                Id="Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
             });
-
 
             var app = builder.Build();
 
@@ -94,12 +104,16 @@ namespace WebApi
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 await UserSeeder.SeedAdminAsync(db);
                 await StudentSeeder.SeedTestStudentAsync(db);
-
             }
 
             app.UseHttpsRedirection();
+
+            // ✅ CORS middleware burada olmalı
+            app.UseCors("AllowFrontend");
+
             app.UseAuthentication();
             app.UseAuthorization();
+
             app.MapControllers();
 
             app.Run();

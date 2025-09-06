@@ -4,13 +4,17 @@ using System.Reflection;
 
 namespace Infrastructure.Persistence
 {
-    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+    public class AppDbContext : DbContext
     {
-        public DbSet<Student> Students => Set<Student>();
-        public DbSet<Course> Courses => Set<Course>();
-        public DbSet<Enrollment> Enrollments => Set<Enrollment>();
-        public DbSet<User> Users => Set<User>();
+        public DbSet<Student> Students { get; set; }
+        public DbSet<Course> Courses { get; set; }
+        public DbSet<Enrollment> Enrollments { get; set; }
+        public DbSet<User> Users { get; set; }
 
+        public AppDbContext(DbContextOptions options) : base(options)
+        {
+
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

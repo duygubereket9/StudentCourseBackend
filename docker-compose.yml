@@ -1,0 +1,10 @@
+services:
+  studentcoursedb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+  studentcourse.api:
+    image: studentcourse_api_image
+    build:
+      context: .
+      dockerfile: WebApi/Dockerfile
+volumes:
+  studentcourse_volume:
