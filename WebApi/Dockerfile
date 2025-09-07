@@ -3,7 +3,6 @@ WORKDIR /app
 
 EXPOSE 80
 COPY Application/*.csproj Application/
-#COPY Persistance/*.csproj Persistance/
 COPY Infrastructure/*.csproj Infrastructure/
 COPY WebApi/*.csproj WebApi/
 

@@ -10,7 +10,7 @@ namespace WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Student")]
+[Authorize(Roles = "Student,Admin")]
 public class EnrollmentController(AppDbContext db) : ControllerBase
 {
     // Derslere kaydol

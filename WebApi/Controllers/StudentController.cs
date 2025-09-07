@@ -4,6 +4,8 @@ using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
+using Infrastructure.Auth;
 
 namespace WebApi.Controllers;
 
@@ -39,21 +41,42 @@ public class StudentController(AppDbContext db) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateStudentDto dto)
+    public async Task<IActionResult> CreateStudent(CreateStudentDto dto)
     {
-        var student = new Student
+        // 1. User nesnesi oluştur
+        var user = new User
         {
-            Id = Guid.NewGuid(),
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            BirthDate = dto.BirthDate
+            Email = dto.Email,
+            PasswordHash = PasswordHasher.Hash(dto.Password),
+            Role = UserRole.Student // Otomatik olarak Student rolü atanıyor
         };
 
-        db.Students.Add(student);
+        await db.Users.AddAsync(user);
+        await db.SaveChangesAsync(); // ID üretmek için önce kaydediyoruz
+
+        // 2. Student nesnesi oluştur (user.Id ile eşleştirerek)
+        var student = new Student
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            BirthDate = dto.BirthDate,
+            UserId = user.Id
+        };
+
+        await db.Students.AddAsync(student);
         await db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(Get), new { id = student.Id }, student);
+        return Ok(new
+        {
+            user.Id,
+            student.FirstName,
+            student.LastName,
+            user.Email,
+            Role = user.Role.ToString()
+        });
     }
+
+
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, UpdateStudentDto dto)

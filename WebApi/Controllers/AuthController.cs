@@ -18,7 +18,7 @@ public class AuthController(AppDbContext db, JwtTokenService jwt) : ControllerBa
     {
         var user = await db.Users.FirstOrDefaultAsync(x => x.Email == req.Email);
         if (user is null || !PasswordHasher.Verify(req.Password, user.PasswordHash))
-            return Unauthorized("Invalid email or password.");
+            return Unauthorized("Email veya şifre hatalı.");
 
         var token = jwt.Generate(user);
         return Ok(new { accessToken = token, role = user.Role.ToString(), Id= user.Id.ToString() });

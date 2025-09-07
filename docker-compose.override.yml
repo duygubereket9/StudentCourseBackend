@@ -8,13 +8,13 @@ services:
       - studentcourse_volume:/var/opt/mssql
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=C.ilme.124
+      - SA_PASSWORD=Password12*
   studentcourse.api:
     container_name: StudentCourseAPI
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - "ConnectionStrings__Default=Server=studentcoursedb;Database=StudentCourseDb;User Id=Dsa;Password=C.ilme.124;TrustServerCertificate=True;"
+      - "ConnectionStrings:Default=Server=studentcoursedb,1433;Database=StudentCourseDb;User=sa; Password=Password12*; TrustServerCertificate=True;"
     depends_on:
       - studentcoursedb
     ports:
-      - "5135:80"
+      - "5005:8080"
